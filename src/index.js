@@ -1,43 +1,26 @@
 const http = require("http");
-const httpStatus = require("http-status-codes");
-
-const app = http.createServer();
 
 const port = 3000;
 
-// Convert the object into a string of JSON Object
-const getJSONString = obj => {
-  return JSON.stringify(obj, null, 2);
+// Define mapping of routes with responses.
+const routeResponseMap = {
+  "/info": "<h1>Info Page</h1>",
+  "/contact": "<h1>Contact Us</h1>",
+  "/about": "<h1>Learn More About Us.</h1>",
+  "/hello": "<h1>Say hello by emailing us here</h1>",
+  "/error": "<h1>Sorry the page you are looking for is not here.</h1>"
 };
 
-app.on("request", (req, res) => {
-  // create an array to hold chunks of contents
-  var body = [];
+const app = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/html" });
 
-  // process it in another callback function
-  req.on("data", bodyData => {
-    // add received data to the boy array
-    body.push(bodyData);
-  });
-
-  // run code when data transmission ends
-  req.on("end", () => {
-    // convert the body array to a string of text
-    body = Buffer.concat(body).toString();
-    // log the request's contents to your console
-    console.log(`Request Body Content: ${body}`);
-  });
-
-  // log our req object as a string
-  console.log(`Method: ${getJSONString(req.method)}`);
-  console.log(`URL: ${getJSONString(req.url)}`);
-  console.log(`Header: ${getJSONString(req.headers)}`);
-
-  res.writeHead(httpStatus.OK, { "Content-Type": "text/html" });
-
-  let responseMessage = "<h1>This will show on the screen.</h1>";
-
-  res.end(responseMessage);
+  // Check whether a request route is defined in the map.
+  if (routeResponseMap[req.url]) {
+    res.end(routeResponseMap[req.url]);
+  } else {
+    // Respond with default HTML
+    res.end("<h1>Welcome</h1>");
+  }
 });
 
 app.listen(port);
