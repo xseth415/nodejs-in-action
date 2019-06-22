@@ -1,28 +1,39 @@
 const http = require("http");
 
+// Require the fs module.
+const fs = require("fs");
+
 const port = 3000;
 
-// Define mapping of routes with responses.
-const routeResponseMap = {
-  "/info": "<h1>Info Page</h1>",
-  "/contact": "<h1>Contact Us</h1>",
-  "/about": "<h1>Learn More About Us.</h1>",
-  "/hello": "<h1>Say hello by emailing us here</h1>",
-  "/error": "<h1>Sorry the page you are looking for is not here.</h1>"
+// Set up route mapping for HTML files.
+const routeMap = {
+  "/": "views/index.html"
 };
 
-const app = http.createServer((req, res) => {
-  res.writeHead(200, { "Content-Type": "text/html" });
+// Create a function to interpolate the URL into the file path.
+const getViewUrl = url => {
+  return `views${url}.html`;
+};
 
-  // Check whether a request route is defined in the map.
-  if (routeResponseMap[req.url]) {
-    res.end(routeResponseMap[req.url]);
-  } else {
-    // Respond with default HTML
-    res.end("<h1>Welcome</h1>");
-  }
-});
+http
+  .createServer((req, res) => {
+    // Get the file-path strings.
+    let viewUrl = getViewUrl(req.url);
 
-app.listen(port);
+    // Interpolate the request URL into your fs file search.
+    fs.readFile(viewUrl, null, (error, data) => {
+      // Handle the errors with a 404 response code.
+      if (error) {
+        res.writeHead(404);
+        res.write("<h1>FILE NOT FOUND</h1>");
+      } else {
+        // Respond with the file contents
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.write(data);
+      }
+      res.end();
+    });
+  })
+  .listen(3000);
 
 console.log(`The server has started and is listening on port number: ${port}`);
